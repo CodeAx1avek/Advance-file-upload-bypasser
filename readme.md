@@ -34,14 +34,10 @@ The generated files are **designed to bypass security filters**, which means the
 
 1.  **Clone the Repository:**
     ```bash
-    git clone https://github.com/your_username/file-bypass-generator.git
-    cd file-bypass-generator
+    [git clone https://github.com/your_username/file-bypass-generator.git](https://github.com/CodeAx1avek/Advance-file-upload-bypasser)
+    cd Advance-file-upload-bypasser
     ```
 
-2.  **Install Python Dependencies:**
-    ```bash
-    pip install -r requirements.txt
-    ```
     *Required libraries: `PyYAML`, `Pillow`*
 
 ---
