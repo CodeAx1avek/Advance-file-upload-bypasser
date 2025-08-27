@@ -1,7 +1,3 @@
-Hahaha! Yes, absolutely. A proper README with a classic "AV warning" is essential. This really sells the "Black Hat" vibe for your tool. 😎
-
-Here's the perfect `README.md` file for your GitHub repository or project folder:
-
 ---
 
 # 🔥 File Bypass Generator - Black Hat Edition 🔥
