@@ -96,6 +96,9 @@ The tool uses `extension.yaml` to define the bypass techniques. You can easily a
     ```bash
     python file_bypasser.py --ratio 1:1 --batch
     ```
+    ```bash
+    python3 advance_bypass.py --ratio 1:1 --type aspx --payload "CUSTOM_ASPAYLOAD"
+    ```
 3.  **Upload the files.** Use Burp Suite Intruder to automate uploading everything in the `bypass_payloads/` folder.
 4.  **Find your shell!** The tool will print access URLs for you. One of them will work.
 5.  **Execute commands & capture the flag:**
