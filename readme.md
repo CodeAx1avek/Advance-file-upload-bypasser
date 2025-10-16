@@ -34,7 +34,7 @@ The generated files are **designed to bypass security filters**, which means the
 
 1.  **Clone the Repository:**
     ```bash
-    [git clone https://github.com/your_username/file-bypass-generator.git](https://github.com/CodeAx1avek/Advance-file-upload-bypasser)
+    git clone our file
     cd Advance-file-upload-bypasser
     ```
 
